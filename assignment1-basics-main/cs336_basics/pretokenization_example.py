@@ -52,7 +52,7 @@ def find_chunk_boundaries(
 ## Usage
 with open(..., "rb") as f:
     boundaries = find_chunk_boundaries(
-        f, num_processes, "<|endoftext|>".encode("utf-8"))
+        f, 4, "<|endoftext|>".encode("utf-8"))
         
     # The following is a serial implementation, but you can parallelize this 
     # by sending each start/end pair to a set of processes.

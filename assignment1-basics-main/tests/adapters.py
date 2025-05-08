@@ -8,7 +8,11 @@ from jaxtyping import Float, Int
 import numpy.typing as npt
 import torch
 from torch import Tensor
-
+#导入本地的程序package
+import sys
+sys.path.append("/Users/bitkira/Documents/GitHub/Stanford-CS336/assignment1-basics-main/")
+from Answer.answercode.BPE import BPE
+#导入本地的程序package
 
 def run_linear(
     d_in: int,
@@ -557,7 +561,6 @@ def get_tokenizer(
     Returns:
         A BPE tokenizer that uses the provided vocab, merges, and special tokens.
     """
-
     raise NotImplementedError
 
 
@@ -588,48 +591,5 @@ def run_train_bpe(
                 representing that <token1> was merged with <token2>.
                 Merges are ordered by order of creation.
     """
-
-    import regex as re
-    from collections import defaultdict
-    import os
-    from typing import BinaryIO
-
-
-    def BPE(input_path: str, vocab_size: int, special_tokens: list[str]):
-        ## Usage
-        PAT = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
-        with open(input_path, "rb") as f:
-           tokens = re.findall(PAT, f)
-
-        vocab:dict[int, bytes] = {i:bytes([i]) for i in range(256)}
-        merges: list[tuple[int, int], int] = []
-        process = [list(i.encode("utf-8")) for i in tokens]
-        
-        for i in range(vocab_size):
-            count = defaultdict(int)
-            for j in process:
-                for index1 , index2 in zip(j, j[1:]):
-                    count[(index1, index2)] += 1
-            pair = max(count, key=count.get)
-            #pair = max(count, key=lambda k: (count.get(k), k))
-            merges.append(pair)
-            index1, index2 = pair
-            vocab[i+256] = vocab[index1]+vocab[index2]
-            newprocess = []
-            for k in process:
-                microprocess = []
-                l = 0
-                while(l<len(k)):
-                    if (l<len(k) - 1 and k[l]==pair[0] and k[l+1]==pair[1]):
-                        microprocess.append(i+256)
-                        l=l+2
-                    else:
-                        microprocess.append(k[l])
-                        l = l+1
-                newprocess.append(microprocess)
-            process = newprocess
-        
-        return vocab, merges
-            
     BPE(input_path, vocab_size, special_tokens)
-    raise NotImplementedError
+    raise 1
