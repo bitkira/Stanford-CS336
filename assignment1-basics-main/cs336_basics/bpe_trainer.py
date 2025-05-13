@@ -196,7 +196,7 @@ def train_bpe_model(
 
 
     # --- Initial Vocabulary setup (part of Step 4.1) ---
-    vocab:dict[int, bytes] = {i:bytes([i]) for i in range(256)}
+    vocab:dict[int, bytes] = {i:b"<|endoftext|>" if i == 0 else bytes([i-1]) for i in range(0, 257)}
     merges: list[tuple[int, int], int] = []
     process = all_pretoken_sequences
     
@@ -233,8 +233,8 @@ if __name__ == "__main__":
     # Example usage: Train on TinyStories validation set
     # Target vocab size 4000, using <|endoftext|> as special token
     # You should replace the input_path with the actual path to your file
-    tiny_stories_valid_path = "/Users/bitkira/Documents/GitHub/Stanford-CS336/assignment1-basics-main/data/TinyStoriesV2-GPT4-valid.txt"
-    target_vocab_size = 4
+    tiny_stories_valid_path = "/Users/bitkira/Documents/GitHub/Stanford-CS336/assignment1-basics-main/tests/fixtures/corpus.en"
+    target_vocab_size = 40
     special_tokens_list = ["<|endoftext|>"] # Pass as a list of strings
 
     # Ensure the file exists
@@ -249,8 +249,8 @@ if __name__ == "__main__":
         )
 
         print("\nBPE Training Complete!")
-        print(f"Final vocabulary size: {len(final_vocab)}")
-        print(f"Number of merges learned: {len(final_merges)}")
+        print(final_vocab)
+        print(final_merges)
 
         # You can add code here to inspect final_vocab or final_merges
         # For example, print the last few learned tokens
