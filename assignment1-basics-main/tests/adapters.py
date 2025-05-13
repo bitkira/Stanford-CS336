@@ -11,7 +11,7 @@ from torch import Tensor
 #导入本地的程序package
 import sys
 sys.path.append("/Users/bitkira/Documents/GitHub/Stanford-CS336/assignment1-basics-main/")
-from Answer.answercode.BPE import BPE
+from cs336_basics.bpe_trainer import train_bpe_model
 #导入本地的程序package
 
 def run_linear(
@@ -591,5 +591,5 @@ def run_train_bpe(
                 representing that <token1> was merged with <token2>.
                 Merges are ordered by order of creation.
     """
-    BPE(input_path, vocab_size, special_tokens)
-    raise 1
+    vocab, merges = train_bpe_model(input_path, vocab_size, special_tokens)
+    return vocab, merges

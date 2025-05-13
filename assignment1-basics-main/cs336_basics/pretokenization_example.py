@@ -50,7 +50,7 @@ def find_chunk_boundaries(
     return sorted(set(chunk_boundaries))
 
 ## Usage
-with open(..., "rb") as f:
+with open("/Users/bitkira/Documents/GitHub/Stanford-CS336/assignment1-basics-main/data/TinyStoriesV2-GPT4-valid.txt", "rb") as f:
     boundaries = find_chunk_boundaries(
         f, 4, "<|endoftext|>".encode("utf-8"))
         
