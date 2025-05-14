@@ -200,23 +200,23 @@ def train_bpe_model(
     merges: list[tuple[int, int], int] = []
     process = all_pretoken_sequences
     
-    for i in range(vocab_size):
+    for i in range(vocab_size-257):
         count = defaultdict(int)
         for j in process:
             for index1 , index2 in zip(j, j[1:]):
                 count[(index1, index2)] += 1
-        pair = max(count, key=count.get)
-        #pair = max(count, key=lambda k: (count.get(k), k))
+        # pair = max(count, key=count.get)
+        pair = max(count, key=lambda k: (count.get(k), k))
         merges.append(pair)
         idx1, idx2 = pair
-        vocab[i+256] = idx1+idx2
+        vocab[i+257] = idx1+idx2
         newprocess = []
         for k in process:
             microprocess = []
             l = 0
             while(l<len(k)):
                 if (l<len(k) - 1 and k[l]==pair[0] and k[l+1]==pair[1]):
-                    microprocess.append(vocab[i+256])
+                    microprocess.append(vocab[i+257])
                     l=l+2
                 else:
                     microprocess.append(k[l])
@@ -234,7 +234,7 @@ if __name__ == "__main__":
     # Target vocab size 4000, using <|endoftext|> as special token
     # You should replace the input_path with the actual path to your file
     tiny_stories_valid_path = "/Users/bitkira/Documents/GitHub/Stanford-CS336/assignment1-basics-main/tests/fixtures/corpus.en"
-    target_vocab_size = 40
+    target_vocab_size = 500
     special_tokens_list = ["<|endoftext|>"] # Pass as a list of strings
 
     # Ensure the file exists
@@ -249,9 +249,8 @@ if __name__ == "__main__":
         )
 
         print("\nBPE Training Complete!")
-        print(final_vocab)
-        print(final_merges)
-
+        for a, b in enumerate(final_vocab):
+            print(a, b)
         # You can add code here to inspect final_vocab or final_merges
         # For example, print the last few learned tokens
         # print("\nLast 10 learned tokens (ID: bytes):")
