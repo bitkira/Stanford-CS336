@@ -13,6 +13,7 @@ import sys
 sys.path.append("/Users/bitkira/Documents/GitHub/Stanford-CS336/assignment1-basics-main/")
 from cs336_basics.bpe_trainer import train_bpe_model
 from cs336_basics.Linear import linear
+from cs336_basics.Embedding import embedding
 #导入本地的程序package
 
 def run_linear(
@@ -57,9 +58,11 @@ def run_embedding(
     Returns:
         Float[Tensor, "... d_model"]: Batch of embeddings returned by your Embedding layer.
     """
-
-    raise NotImplementedError
-
+    EmbeddingLayer = embedding(vocab_size, d_model)
+    WeightDict = {"EmbeddingLayer":weights}
+    EmbeddingLayer.load_state_dict(WeightDict)
+    
+    return EmbeddingLayer(token_ids)
 
 def run_swiglu(
     d_model: int,
