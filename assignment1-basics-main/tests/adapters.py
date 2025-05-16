@@ -12,6 +12,7 @@ from torch import Tensor
 import sys
 sys.path.append("/Users/bitkira/Documents/GitHub/Stanford-CS336/assignment1-basics-main/")
 from cs336_basics.bpe_trainer import train_bpe_model
+from cs336_basics.Linear import linear
 #导入本地的程序package
 
 def run_linear(
@@ -32,8 +33,10 @@ def run_linear(
     Returns:
         Float[Tensor, "... d_out"]: The transformed output of your linear module.
     """
-
-    raise NotImplementedError
+    state_dict = {'W': weights}
+    W = linear(d_in, d_out)
+    W.load_state_dict(state_dict)
+    return W(in_features)
 
 
 def run_embedding(
