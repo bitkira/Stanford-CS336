@@ -14,6 +14,8 @@ sys.path.append("/Users/bitkira/Documents/GitHub/Stanford-CS336/assignment1-basi
 from cs336_basics.bpe_trainer import train_bpe_model
 from cs336_basics.Linear import linear
 from cs336_basics.Embedding import embedding
+from cs336_basics.RMSnorm import RMSnorm
+
 #导入本地的程序package
 
 def run_linear(
@@ -388,7 +390,10 @@ def run_rmsnorm(
         Float[Tensor,"... d_model"]: Tensor of with the same shape as `in_features` with the output of running
         RMSNorm of the `in_features`.
     """
-    raise NotImplementedError
+    RMSlayer = RMSnorm(d_model, eps)
+    RMSnormDict = {"g": weights}
+    RMSlayer.load_state_dict(RMSnormDict)
+    return RMSlayer(in_features)
 
 
 def run_silu(in_features: Float[Tensor, " ..."]) -> Float[Tensor, " ..."]:
