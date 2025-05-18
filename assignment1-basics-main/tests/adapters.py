@@ -17,7 +17,7 @@ from cs336_basics.Embedding import embedding
 from cs336_basics.RMSnorm import RMSnorm
 from cs336_basics.SwiGLU import SwiGLU
 from cs336_basics.Softmax import softmax
-
+from cs336_basics.ScaledDotProductAttention import scaled_dot_product_attention
 #导入本地的程序package
 
 def run_linear(
@@ -123,7 +123,7 @@ def run_scaled_dot_product_attention(
     Returns:
         Float[Tensor, " ... queries d_v"]: Output of SDPA
     """
-    raise NotImplementedError
+    return scaled_dot_product_attention(q=Q, k=K, v=V, mask=mask)
 
 
 def run_multihead_self_attention(
