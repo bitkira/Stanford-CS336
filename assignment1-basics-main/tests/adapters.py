@@ -15,6 +15,8 @@ from cs336_basics.bpe_trainer import train_bpe_model
 from cs336_basics.Linear import linear
 from cs336_basics.Embedding import embedding
 from cs336_basics.RMSnorm import RMSnorm
+from cs336_basics.SwiGLU import SwiGLU
+from cs336_basics.Softmax import softmax
 
 #导入本地的程序package
 
@@ -95,7 +97,12 @@ def run_swiglu(
     # swiglu.w1.weight.data = w1_weight
     # swiglu.w2.weight.data = w2_weight
     # swiglu.w3.weight.data = w3_weight
-    raise NotImplementedError
+    swiglu = SwiGLU(d_model, d_ff)
+    weights = {"w1.W":w1_weight,
+               "w2.W":w2_weight,
+               "w3.W":w3_weight}
+    swiglu.load_state_dict(weights)
+    return swiglu(in_features)
 
 
 def run_scaled_dot_product_attention(
@@ -446,7 +453,7 @@ def run_softmax(in_features: Float[Tensor, " ..."], dim: int) -> Float[Tensor, "
         Float[Tensor, "..."]: Tensor of with the same shape as `in_features` with the output of
         softmax normalizing the specified `dim`.
     """
-    raise NotImplementedError
+    return softmax(in_features, dim)
 
 
 def run_cross_entropy(inputs: Float[Tensor, " batch_size vocab_size"], targets: Int[Tensor, " batch_size"]) -> Float[Tensor, ""]:
