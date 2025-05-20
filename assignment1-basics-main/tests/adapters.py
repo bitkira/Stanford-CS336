@@ -19,7 +19,7 @@ from cs336_basics.SwiGLU import SwiGLU
 from cs336_basics.Softmax import softmax
 from cs336_basics.ScaledDotProductAttention import scaled_dot_product_attention
 #导入本地的程序package
-
+from cs336_basics.RoPE import rope
 def run_linear(
     d_in: int,
     d_out: int,
@@ -219,7 +219,8 @@ def run_rope(
     Returns:
         Float[Tensor, " ... sequence_length d_k"]: Tensor with RoPEd input.
     """
-    raise NotImplementedError
+    Rope = rope(theta, d_k, max_seq_len)
+    return Rope(in_query_or_key, token_positions)
 
 
 def run_transformer_block(
