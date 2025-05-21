@@ -18,8 +18,10 @@ from cs336_basics.RMSnorm import RMSnorm
 from cs336_basics.SwiGLU import SwiGLU
 from cs336_basics.Softmax import softmax
 from cs336_basics.ScaledDotProductAttention import scaled_dot_product_attention
-#导入本地的程序package
 from cs336_basics.RoPE import rope
+from cs336_basics.MHA import MultiheadSelfAttention
+from cs336_basics.FullTransformerBlock import TransformerBlock
+from cs336_basics.TransformerLM import Transformer
 def run_linear(
     d_in: int,
     d_out: int,
@@ -157,7 +159,13 @@ def run_multihead_self_attention(
         Float[Tensor, " ... sequence_length d_out"]: Tensor with the output of running your optimized, batched multi-headed attention
         implementation with the given QKV projection weights and input features.
     """
-    raise NotImplementedError
+    MHA_layer = MultiheadSelfAttention(d_model, num_heads)
+    weight = {"Q.W":q_proj_weight,
+              "K.W":k_proj_weight,
+              "V.W":v_proj_weight,
+              "O.W":o_proj_weight,}
+    MHA_layer.load_state_dict(weight)
+    return MHA_layer(in_features)
 
 
 def run_multihead_self_attention_with_rope(
@@ -197,7 +205,13 @@ def run_multihead_self_attention_with_rope(
         Float[Tensor, " ... sequence_length d_out"]: Tensor with the output of running your optimized, batched multi-headed attention
         implementation with the given QKV projection weights and input features.
     """
-    raise NotImplementedError
+    MHA_layer = MultiheadSelfAttention(d_model, num_heads, max_seq_len, theta, token_positions)
+    weight = {"Q.W":q_proj_weight,
+              "K.W":k_proj_weight,
+              "V.W":v_proj_weight,
+              "O.W":o_proj_weight,}
+    MHA_layer.load_state_dict(weight)
+    return MHA_layer(in_features)
 
 
 def run_rope(
@@ -293,7 +307,20 @@ def run_transformer_block(
         Float[Tensor, "batch sequence_length d_model"] Tensor with the output of
         running the Transformer block on the input features while using RoPE.
     """
-    raise NotImplementedError
+    Block = TransformerBlock(d_model, num_heads, d_ff, max_seq_len, theta, token_pos=in_features.shape[-2])
+    Blockdict = {
+            "MHA_layer.Q.W":weights["attn.q_proj.weight"],
+            "MHA_layer.K.W":weights["attn.k_proj.weight"],
+            "MHA_layer.V.W":weights["attn.v_proj.weight"],
+            "MHA_layer.O.W":weights["attn.output_proj.weight"],
+            "norm1.g":weights["ln1.weight"],
+            "norm2.g":weights["ln2.weight"],
+            "SwiGLU.w1.W":weights["ffn.w1.weight"],
+            "SwiGLU.w2.W":weights["ffn.w2.weight"],
+            "SwiGLU.w3.W":weights["ffn.w3.weight"],
+            }
+    Block.load_state_dict(Blockdict)
+    return Block(in_features)
 
 
 def run_transformer_lm(
@@ -375,8 +402,139 @@ def run_transformer_lm(
         Float[Tensor, "batch_size sequence_length vocab_size"]: Tensor with the predicted unnormalized
         next-word distribution for each token.
     """
-    raise NotImplementedError
+    LM = Transformer(d_model, num_heads, d_ff, rope_theta, in_indices.shape[-1], vocab_size, context_length, num_layers)
+    new_state_dict = {}
 
+    # --- 1. Embedding Layer ---
+    # 你的模型: layers.0.EmbeddingLayer
+    # 提供方: token_embeddings.weight
+    if "token_embeddings.weight" in weights:
+        new_state_dict["layers.0.EmbeddingLayer"] = weights["token_embeddings.weight"]
+    else:
+        print(f"Warning: Missing 'token_embeddings.weight' for 'layers.0.EmbeddingLayer'")
+
+    # --- 2. Transformer Blocks ---
+    # 你的模型中的 layers.{i} (i 从 1 到 3) 对应提供方 layers.{j} (j 从 0 到 2)
+    num_my_transformer_layers = 3 # 根据你的键名 "layers.3.norm1.g" 推断
+
+    for i_my_layer in range(1, num_my_transformer_layers + 1):
+        j_provider_layer = i_my_layer - 1 # 提供方的层索引从0开始
+
+        # 第一个归一化层 (norm1)
+        # 你的模型: layers.{i_my_layer}.norm1.g
+        # 提供方: layers.{j_provider_layer}.ln1.weight
+        provider_key = f"layers.{j_provider_layer}.ln1.weight"
+        my_key = f"layers.{i_my_layer}.norm1.g"
+        if provider_key in weights:
+            new_state_dict[my_key] = weights[provider_key]
+        else:
+            print(f"Warning: Missing '{provider_key}' for '{my_key}'")
+
+        # 第二个归一化层 (norm2)
+        # 你的模型: layers.{i_my_layer}.norm2.g
+        # 提供方: layers.{j_provider_layer}.ln2.weight
+        provider_key = f"layers.{j_provider_layer}.ln2.weight"
+        my_key = f"layers.{i_my_layer}.norm2.g"
+        if provider_key in weights:
+            new_state_dict[my_key] = weights[provider_key]
+        else:
+            print(f"Warning: Missing '{provider_key}' for '{my_key}'")
+
+        # 多头注意力 (MHA_layer) - Q
+        # 你的模型: layers.{i_my_layer}.MHA_layer.Q.W
+        # 提供方: layers.{j_provider_layer}.attn.q_proj.weight
+        provider_key = f"layers.{j_provider_layer}.attn.q_proj.weight"
+        my_key = f"layers.{i_my_layer}.MHA_layer.Q.W"
+        if provider_key in weights:
+            new_state_dict[my_key] = weights[provider_key]
+        else:
+            print(f"Warning: Missing '{provider_key}' for '{my_key}'")
+
+        # 多头注意力 (MHA_layer) - K
+        # 你的模型: layers.{i_my_layer}.MHA_layer.K.W
+        # 提供方: layers.{j_provider_layer}.attn.k_proj.weight
+        provider_key = f"layers.{j_provider_layer}.attn.k_proj.weight"
+        my_key = f"layers.{i_my_layer}.MHA_layer.K.W"
+        if provider_key in weights:
+            new_state_dict[my_key] = weights[provider_key]
+        else:
+            print(f"Warning: Missing '{provider_key}' for '{my_key}'")
+
+        # 多头注意力 (MHA_layer) - V
+        # 你的模型: layers.{i_my_layer}.MHA_layer.V.W
+        # 提供方: layers.{j_provider_layer}.attn.v_proj.weight
+        provider_key = f"layers.{j_provider_layer}.attn.v_proj.weight"
+        my_key = f"layers.{i_my_layer}.MHA_layer.V.W"
+        if provider_key in weights:
+            new_state_dict[my_key] = weights[provider_key]
+        else:
+            print(f"Warning: Missing '{provider_key}' for '{my_key}'")
+
+        # 多头注意力 (MHA_layer) - O
+        # 你的模型: layers.{i_my_layer}.MHA_layer.O.W
+        # 提供方: layers.{j_provider_layer}.attn.output_proj.weight
+        provider_key = f"layers.{j_provider_layer}.attn.output_proj.weight"
+        my_key = f"layers.{i_my_layer}.MHA_layer.O.W"
+        if provider_key in weights:
+            new_state_dict[my_key] = weights[provider_key]
+        else:
+            print(f"Warning: Missing '{provider_key}' for '{my_key}'")
+
+        # SwiGLU 前馈网络 - w1
+        # 你的模型: layers.{i_my_layer}.SwiGLU.w1.W
+        # 提供方: layers.{j_provider_layer}.ffn.w1.weight
+        provider_key = f"layers.{j_provider_layer}.ffn.w1.weight"
+        my_key = f"layers.{i_my_layer}.SwiGLU.w1.W"
+        if provider_key in weights:
+            new_state_dict[my_key] = weights[provider_key]
+        else:
+            print(f"Warning: Missing '{provider_key}' for '{my_key}'")
+
+        # SwiGLU 前馈网络 - w2
+        # 你的模型: layers.{i_my_layer}.SwiGLU.w2.W
+        # 提供方: layers.{j_provider_layer}.ffn.w2.weight
+        provider_key = f"layers.{j_provider_layer}.ffn.w2.weight"
+        my_key = f"layers.{i_my_layer}.SwiGLU.w2.W"
+        if provider_key in weights:
+            new_state_dict[my_key] = weights[provider_key]
+        else:
+            print(f"Warning: Missing '{provider_key}' for '{my_key}'")
+
+        # SwiGLU 前馈网络 - w3
+        # 你的模型: layers.{i_my_layer}.SwiGLU.w3.W
+        # 提供方: layers.{j_provider_layer}.ffn.w3.weight
+        provider_key = f"layers.{j_provider_layer}.ffn.w3.weight"
+        my_key = f"layers.{i_my_layer}.SwiGLU.w3.W"
+        if provider_key in weights:
+            new_state_dict[my_key] = weights[provider_key]
+        else:
+            print(f"Warning: Missing '{provider_key}' for '{my_key}'")
+
+
+    # --- 3. Final Layers ---
+
+    # 最终归一化层
+    # 你的模型: layers.4.g 和 norm_layer.g
+    # 提供方: ln_final.weight
+    provider_key = "ln_final.weight"
+    if provider_key in weights:
+        new_state_dict["layers.4.g"] = weights[provider_key]
+        new_state_dict["norm_layer.g"] = weights[provider_key]
+    else:
+        print(f"Warning: Missing '{provider_key}' for 'layers.4.g' and 'norm_layer.g'")
+
+    # 最终线性输出层
+    # 你的模型: layers.5.W 和 linear_layer.W
+    # 提供方: lm_head.weight
+    provider_key = "lm_head.weight"
+    if provider_key in weights:
+        new_state_dict["layers.5.W"] = weights[provider_key]
+        new_state_dict["linear_layer.W"] = weights[provider_key]
+    else:
+        print(f"Warning: Missing '{provider_key}' for 'layers.5.W' and 'linear_layer.W'")
+
+    LM.load_state_dict(new_state_dict)
+    return LM(in_indices)
 
 def run_rmsnorm(
     d_model: int,
