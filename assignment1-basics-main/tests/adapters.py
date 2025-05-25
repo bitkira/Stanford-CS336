@@ -25,6 +25,8 @@ from cs336_basics.TransformerLM import Transformer
 from cs336_basics.CrossEntropy import CrossEntropy
 from cs336_basics.AdamW import AdamW
 from cs336_basics.CosineLearningRateSchedule import CosineLearningRateSchedule
+from cs336_basics.GradientClip import GradientClipping
+from cs336_basics.DataLoader import DataLoader
 def run_linear(
     d_in: int,
     d_out: int,
@@ -599,7 +601,7 @@ def run_get_batch(
         is the sampled input sequences, and the second tuple item is the corresponding
         language modeling labels.
     """
-    raise NotImplementedError
+    return DataLoader( dataset, batch_size, context_length, device)
 
 
 def run_softmax(in_features: Float[Tensor, " ..."], dim: int) -> Float[Tensor, " ..."]:
@@ -643,7 +645,7 @@ def run_gradient_clipping(parameters: Iterable[torch.nn.Parameter], max_l2_norm:
 
     The gradients of the parameters (parameter.grad) should be modified in-place.
     """
-    raise NotImplementedError
+    GradientClipping(parameters, max_l2_norm)
 
 
 def get_adamw_cls() -> type[torch.optim.Optimizer]:
