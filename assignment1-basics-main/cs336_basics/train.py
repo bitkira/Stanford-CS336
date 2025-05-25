@@ -41,7 +41,7 @@ def train(data_dir, model:nn.Module, batch_size, learning_rate, epochs, checkpoi
             logits = rearrange(logits, "batchsize seqlen vocabsize -> (batchsize seqlen) vocabsize")
             label = rearrange(label, "batchsize seqlen -> (batchsize seqlen) ")
             loss = CrossEntropy(logits, label)
-            loss.backwarp()
+            loss.backward()
             optimizer.step()
             run.log({"loss": loss})
         save_checkpoint(model, optimizer, i, checkpoint_dir)

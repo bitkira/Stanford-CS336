@@ -1,0 +1,2 @@
+/Users/bitkira/Documents/GitHub/Stanford-CS336/assignment1-basics-main/cs336_basics/DataLoader.py:21: UserWarning: Creating a tensor from a list of numpy.ndarrays is extremely slow. Please consider converting the list to a single numpy.ndarray with numpy.array() before converting to a tensor. (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_new.cpp:257.)
+  return (torch.tensor(batchinput, device=device_string), torch.tensor(batchlabel, device=device_string))

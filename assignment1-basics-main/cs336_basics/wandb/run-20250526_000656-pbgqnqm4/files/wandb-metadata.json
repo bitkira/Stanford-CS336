@@ -1,0 +1,43 @@
+{
+  "os":  "macOS-15.4-arm64-arm-64bit",
+  "python":  "CPython 3.12.9",
+  "startedAt":  "2025-05-25T16:06:56.925267Z",
+  "program":  "/Users/bitkira/Documents/GitHub/Stanford-CS336/assignment1-basics-main/cs336_basics/toy_train.py",
+  "codePath":  "assignment1-basics-main/cs336_basics/toy_train.py",
+  "git":  {
+    "remote":  "https://github.com/bitkira/Stanford-CS336.git",
+    "commit":  "e68ac3e593f658fdec134199afa70f8716888f98"
+  },
+  "email":  "1120211519@bit.edu.cn",
+  "root":  "/Users/bitkira/Documents/GitHub/Stanford-CS336/assignment1-basics-main/cs336_basics",
+  "host":  "bitkiradeMac-mini.local",
+  "executable":  "/opt/anaconda3/envs/MacPytorch/bin/python",
+  "codePathLocal":  "toy_train.py",
+  "cpu_count":  10,
+  "cpu_count_logical":  10,
+  "disk":  {
+    "/":  {
+      "total":  "245107195904",
+      "used":  "181111672832"
+    },
+    "/System/Volumes/Data":  {
+      "total":  "245107195904",
+      "used":  "181111672832"
+    }
+  },
+  "memory":  {
+    "total":  "34359738368"
+  },
+  "cpu":  {
+    "count":  10,
+    "countLogical":  10
+  },
+  "apple":  {
+    "name":  "Apple M4",
+    "ecpuCores":  6,
+    "pcpuCores":  4,
+    "gpuCores":  10,
+    "memoryGb":  32,
+    "ramTotalBytes":  "34359738368"
+  }
+}

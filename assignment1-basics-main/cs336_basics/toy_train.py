@@ -14,7 +14,7 @@ transformer_instance = Transformer(
 )
 transformer_instance.to(device="mps")
 
-toy_long_sequence_data = np.random.randint(0, 50, size=1000, dtype=np.int64)
+toy_long_sequence_data = np.random.randint(0, 30, size=1000, dtype=np.int64)
 
 # 更新后的 train() 函数调用：
 train(
