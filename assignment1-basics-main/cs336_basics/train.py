@@ -10,7 +10,7 @@ import numpy as np
 import wandb
 from einops import rearrange
 
-def train(data_dir, model:nn.Module, batch_size, learning_rate, epochs, checkpoint_dir, beta1, beta2, Lambda, eps, context_length, device_string="mps"):
+def train(data_dir, model:nn.Module,model_name:str, batch_size, learning_rate, epochs, checkpoint_dir, beta1, beta2, Lambda, eps, context_length, device_string="mps"):
         # Start a new wandb run to track this script.
     run = wandb.init(
         # Set the wandb entity where your project will be logged (generally your team name).
@@ -20,7 +20,7 @@ def train(data_dir, model:nn.Module, batch_size, learning_rate, epochs, checkpoi
         # Track hyperparameters and run metadata.
         config={
             "learning_rate": learning_rate,
-            "architecture": model.__class__.__name__,
+            "architecture": model_name,
             "dataset": data_dir,
             "beta1": beta1,
             "beta2": beta2,
@@ -34,7 +34,7 @@ def train(data_dir, model:nn.Module, batch_size, learning_rate, epochs, checkpoi
     # input_token = np.memmap(data_dir, dtype=np.float32, mode='r')
     optimizer  = AdamW(model.parameters(), learning_rate, (beta1, beta2), eps, Lambda)
     for i in range(epochs):
-        for j in range(len(input_token)//batch_size*context_length):
+        for j in range(len(input_token)//(batch_size*context_length)):
             input, label = DataLoader(input_token, batch_size, context_length, device_string)
             optimizer.zero_grad()
             logits = model(input)
@@ -45,8 +45,7 @@ def train(data_dir, model:nn.Module, batch_size, learning_rate, epochs, checkpoi
             optimizer.step()
             run.log({"loss": loss})
         save_checkpoint(model, optimizer, i, checkpoint_dir)
-    run.log({"loss": loss})
-    
+    run.finish()
 
 if __name__ == "__name__":
     parser = argparse.ArgumentParser(description="cs336模型训练脚本")
