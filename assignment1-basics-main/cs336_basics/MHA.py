@@ -36,6 +36,8 @@ class MultiheadSelfAttention(nn.Module):
         else:
             self.rope = None
     def forward(self, x):
+        x.to(get_device())
+        print(x.device)
         mask = torch.tril(torch.ones(x.shape[1], x.shape[1], dtype=int,  device = self.device)).bool()
         Q = rearrange(self.Q(x), "batch_size seq_len (h dk) -> batch_size h seq_len dk", h=self.num_heads, dk=self.d_model//self.num_heads)
         K = rearrange(self.K(x), "batch_size seq_len (h dk) -> batch_size h seq_len dk", h=self.num_heads, dk=self.d_model//self.num_heads)
