@@ -11,19 +11,27 @@ from cs336_basics.Softmax import softmax
 from cs336_basics.ScaledDotProductAttention import scaled_dot_product_attention
 from cs336_basics.RoPE import rope
 
+def get_device():
+    if torch.cuda.is_available():
+        return torch.device('cuda')
+    elif torch.backends.mps.is_available():
+        return torch.device('mps')
+    else:
+        return torch.device('cpu')
+
 class MultiheadSelfAttention(nn.Module):
-    def __init__(self, d_model, num_heads, device, max_seq_len=None, theta=None, token_positions=None):
+    def __init__(self, d_model, num_heads, max_seq_len=None, theta=None, token_positions=None):
         super().__init__()
         assert d_model % num_heads == 0, "d_model must be divisible by num_heads"
-        self.device = device
+        self.device = get_device()
         self.num_heads = num_heads
         self.d_model = d_model
-        self.Q = linear(d_model, d_model)
-        self.K = linear(d_model, d_model)
-        self.V = linear(d_model, d_model)
-        self.O = linear(d_model, d_model)
+        self.Q = linear(d_model, d_model, self.device )
+        self.K = linear(d_model, d_model, self.device )
+        self.V = linear(d_model, d_model, self.device )
+        self.O = linear(d_model, d_model, self.device )
         if theta is not None:
-            self.rope = rope(theta, d_model//num_heads, max_seq_len, device=device)
+            self.rope = rope(theta, d_model//num_heads, max_seq_len, device=self.device )
             self.token_pos = token_positions
         else:
             self.rope = None

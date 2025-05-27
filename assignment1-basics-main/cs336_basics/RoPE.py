@@ -17,6 +17,7 @@ class rope(nn.Module):
             R[1::2, 0::2] = np.diag(torch.sin(j/THETA)) 
             R[1::2, 1::2] = np.diag(torch.cos(j/THETA))
             R_list.append(R)
+        R_list = np.array(R_list)
         self.register_buffer("RoPE" ,torch.tensor(R_list, dtype=torch.float32, device=device),persistent=False)
     def forward(self, x: torch.Tensor, token_positions: torch.Tensor) -> torch.Tensor:
         self.PosRoPE = self.RoPE[0:x.shape[-2], :, :]
