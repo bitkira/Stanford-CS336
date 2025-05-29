@@ -165,20 +165,13 @@ def run_multihead_self_attention(
         Float[Tensor, " ... sequence_length d_out"]: Tensor with the output of running your optimized, batched multi-headed attention
         implementation with the given QKV projection weights and input features.
     """
-    def get_device():
-        if torch.cuda.is_available():
-            return torch.device('cuda')
-        elif torch.backends.mps.is_available():
-            return torch.device('mps')
-        else:
-            return torch.device('cpu')
-    MHA_layer = MultiheadSelfAttention(d_model, num_heads)
+
+    MHA_layer = MultiheadSelfAttention(d_model, num_heads,device="cpu")
     weight = {"Q.W":q_proj_weight,
               "K.W":k_proj_weight,
               "V.W":v_proj_weight,
               "O.W":o_proj_weight,}
     MHA_layer.load_state_dict(weight)
-    MHA_layer.to(get_device())
     return MHA_layer(in_features)
 
 
@@ -219,7 +212,7 @@ def run_multihead_self_attention_with_rope(
         Float[Tensor, " ... sequence_length d_out"]: Tensor with the output of running your optimized, batched multi-headed attention
         implementation with the given QKV projection weights and input features.
     """
-    MHA_layer = MultiheadSelfAttention(d_model, num_heads, max_seq_len, theta, token_positions)
+    MHA_layer = MultiheadSelfAttention(d_model, num_heads,"cpu", max_seq_len, theta, token_positions)
     weight = {"Q.W":q_proj_weight,
               "K.W":k_proj_weight,
               "V.W":v_proj_weight,
@@ -321,7 +314,7 @@ def run_transformer_block(
         Float[Tensor, "batch sequence_length d_model"] Tensor with the output of
         running the Transformer block on the input features while using RoPE.
     """
-    Block = TransformerBlock(d_model, num_heads, d_ff, max_seq_len, theta, token_pos=in_features.shape[-2])
+    Block = TransformerBlock(d_model, num_heads, d_ff, max_seq_len, theta, token_pos=in_features.shape[-2],device="cpu")
     Blockdict = {
             "MHA_layer.Q.W":weights["attn.q_proj.weight"],
             "MHA_layer.K.W":weights["attn.k_proj.weight"],

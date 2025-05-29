@@ -9,8 +9,9 @@ import argparse
 import numpy as np
 import wandb
 from einops import rearrange
+import torch
 
-def train(data_dir, model:nn.Module,model_name:str, batch_size, learning_rate, epochs, checkpoint_dir, beta1, beta2, Lambda, eps, context_length, device_string="mps"):
+def train(data_dir, model:nn.Module,model_name:str, batch_size, learning_rate, epochs, checkpoint_dir, beta1, beta2, Lambda, eps, context_length, device_string="cuda" if torch.cuda.is_available() else "cpu"):
         # Start a new wandb run to track this script.
     run = wandb.init(
         # Set the wandb entity where your project will be logged (generally your team name).
