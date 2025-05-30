@@ -21,4 +21,4 @@ class rope(nn.Module):
         self.register_buffer("RoPE" ,torch.tensor(R_list, dtype=torch.float32, device=device),persistent=False)
     def forward(self, x: torch.Tensor, token_positions: torch.Tensor) -> torch.Tensor:
         self.PosRoPE = self.RoPE[0:x.shape[-2], :, :]
-        return einsum(x, self.PosRoPE[token_positions], "... sequence_length d_k, ... sequence_length dk d_k-> ... sequence_length dk")
+        return einsum(x, self.PosRoPE, "... sequence_length d_k, ... sequence_length dk d_k-> ... sequence_length dk")
