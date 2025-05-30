@@ -1,7 +1,0 @@
-{"time":"2025-05-26T00:01:05.259134+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.9","symlink path":"/Users/bitkira/Documents/GitHub/Stanford-CS336/wandb/run-20250526_000105-wjr46ztq/logs/debug-core.log"}
-{"time":"2025-05-26T00:01:06.042593+08:00","level":"INFO","msg":"created new stream","id":"wjr46ztq"}
-{"time":"2025-05-26T00:01:06.042633+08:00","level":"INFO","msg":"stream: started","id":"wjr46ztq"}
-{"time":"2025-05-26T00:01:06.042641+08:00","level":"INFO","msg":"handler: started","stream_id":"wjr46ztq"}
-{"time":"2025-05-26T00:01:06.042649+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"wjr46ztq"}
-{"time":"2025-05-26T00:01:06.042654+08:00","level":"INFO","msg":"sender: started","stream_id":"wjr46ztq"}
-{"time":"2025-05-26T00:01:06.361511+08:00","level":"INFO","msg":"Starting system monitor"}
